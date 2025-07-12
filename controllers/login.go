@@ -15,6 +15,13 @@ func (c *LoginController) Get() {
 	c.TplName = "Login.html"
 }
 
+func GetUserByNumber(number string) (user *models.UserTable, err error) {
+	o := orm.NewOrm()
+	user = &models.UserTable{Number: number}
+	err = o.Read(user)
+	return user, err
+}
+
 func (c *LoginController) HandleLoginPost() {
 	//1.拿到数据
 	Name := c.GetString("Name")
@@ -27,7 +34,6 @@ func (c *LoginController) HandleLoginPost() {
 		c.Redirect("/Login", 302)
 		return
 	}
-	//3.插入数据库
 	o := orm.NewOrm()
 
 	user := models.UserTable{}
@@ -45,6 +51,11 @@ func (c *LoginController) HandleLoginPost() {
 	}
 	if flag1 == 1 && flag2 == 1 {
 		c.TplName = "User.html"
+		c.Data["qqName"] = user.Name
+		c.Data["qqNumber"] = user.Number
+		c.Data["ysUID"] = user.UID_YUAN
+		c.Data["btUID"] = user.UID_BENG
+		c.Data["zzzUID"] = user.UID_JUE
 	} else {
 		c.TplName = "Login.html"
 	}
