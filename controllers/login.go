@@ -36,26 +36,29 @@ func (c *LoginController) HandleLoginPost() {
 	}
 	o := orm.NewOrm()
 
-	user := models.UserTable{}
-	user.Name = Name
-	user.Number = Number
+	user := models.UserTable{Name: Name, Number: Number}
 	flag1 := 0
-	flag2 := 0
-	exist := o.Read(&user, "number")
+	exist := o.Raw("SELECT * FROM user_table WHERE Name = ? AND Number = ?", user.Name, user.Number).QueryRow(&user)
 	if exist == nil {
 		flag1 = 1
 	}
-	exist1 := o.Read(&user, "name")
-	if exist1 == nil {
-		flag2 = 1
-	}
-	if flag1 == 1 && flag2 == 1 {
+	if flag1 == 1 {
 		c.TplName = "User.html"
 		c.Data["qqName"] = user.Name
 		c.Data["qqNumber"] = user.Number
 		c.Data["ysUID"] = user.UID_YUAN
 		c.Data["btUID"] = user.UID_BENG
 		c.Data["zzzUID"] = user.UID_JUE
+
+		//全部展示 不分页
+		var users []models.UserTable
+		_, err := o.QueryTable("user_table").All(&users)
+		if err != nil {
+			c.Abort("500")
+			return
+		}
+		c.Data["users"] = users
+
 	} else {
 		c.TplName = "Login.html"
 	}
